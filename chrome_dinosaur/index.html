@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+
+<body>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser-arcade-physics.min.js"></script>
+
+  <script>
+    class Main extends Phaser.Scene {
+      
+      /* Carga las imagenes necesarias para el juego */
+      preload() {
+        this.load.image('background', './assets/background.png');
+
+        this.load.spritesheet('player', './assets/player.png', {
+          frameWidth: 180,
+          frameHeight: 180
+        });
+        
+        this.load.spritesheet('enemy', './assets/enemy.png', {
+          frameWidth: 192,
+          frameHeight: 95
+        });
+      }
+
+      /* Crea los elementos del juego */
+      create() {
+        /* Variable para saber que el juego ha acabado */
+        this.game_over = false;
+
+        /* Variable para definir la letra de reiniciar el juego (es la R) */
+        this.restartKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+
+        /* Crea una imagen que se repite horizontalmente como background
+          Los dos primeros digitos indican donde empieza la imagen en los ejes X/Y y los digitos del setOrigin indican el origen de la imagen dentro del eje X/Y.
+
+          En este caso, la imagen empieza en el punto 0 (el borde izquierdo del canva) y su origen esta en 0, que significa que su origen es el lado izquierdo de la imagen. Es decir se alinea el borde izquierdo de la imagen con el borde izquierdo del canva.
+
+          Para el eje horizontal, la imagen empieza en el centro del canva (window.innerHeight / 2), y su origen esta en 0.5, esto significa que el origen vertical de la imagen es el centro de la imagen. Es decir, que se esta alineando el centro horizontal de la imagen con el centro horizontal del canva.
+        */
+        this.background = this.add.tileSprite(0, window.innerHeight / 2, window.innerWidth, 250, 'background').setOrigin(0, 0.5);     
+
+        /* Animación para simular que el jugador corre. */
+        this.anims.create({
+          key: 'player_run',
+          frames: this.anims.generateFrameNumbers('player', { start: 2, end: 5 }),
+          frameRate: 5,
+          repeat: -1
+        });
+
+        /* Animación para simular que el jugador salta. */
+        this.anims.create({
+          key: 'player_jump',
+          frames: this.anims.generateFrameNumbers('player', { start: 6, end: 7 }),
+          frameRate: 5,
+          repeat: -1
+        });
+
+        /* Animación para simular el enemigo caminando. */
+        this.anims.create({
+          key: 'enemy_run',
+          frames: this.anims.generateFrameNumbers('enemy', { start: 0, end: 3 }),
+          frameRate: 10,
+          repeat: -1
+        });
+
+        /* Crea un rectangulo como suelo
+          Este rectangulo tendra un ancho de toda la pantalla y un alto de 1 pixel. Se situara verticalmente unos pixeles por debajo del centro del canva.
+
+          También se establecen fisicas, para poder usarlo como punto de salto para el jugador.
+        */
+        this.ground = this.add.rectangle(window.innerWidth / 2, window.innerHeight / 2 + 10, window.innerWidth, 1);
+        this.physics.add.existing(this.ground, true);
+
+        /* Crea un sprite para el jugador 
+          El margen izquierdo se coloca en el pixel 100 y el margen inferior de la imagen se situa unos pixeles por debajo del margen central del canva. 
+          
+          Activa la animación de moverse para el sprite del jugador.
+        */
+        this.player = this.physics.add.sprite(100, this.ground.y)
+        .setOrigin(0,1)
+        .setDisplaySize(10, 10)
+        .play('player_run');
+
+        /* Ajusta el tamaño del cuerpo del jugador para que coincida con el tamaño del sprite */
+        this.player.body.setSize(this.player.width, this.player.height);
+
+        /* Crea colisiones entre el sprite del jugador y el suelo, para que no se caiga */
+        this.physics.add.collider(this.player, this.ground);
+
+        /* Spawnea un nuevo enemigo
+          Establece un tiempo aleatorio entre 1 y 2 segundos para que aparezca un nuevo enemigo. Pasado ese tiempo, crea el nuevo enemigo.
+        */
+        this.enemies = [];
+        this.time.addEvent({
+          delay: Phaser.Math.Between(1000, 2000),
+          callback: this.spawn_enemy,
+          callbackScope: this,
+          loop: true
+        });
+
+        /* Los enemigos empiezan moviendose a una velocidad determinada y cada segundo que pasa,esta aumenta.
+        */
+        this.enemy_velocity = -200;
+        this.time.addEvent({
+          delay: 1000,
+          callback: () => {
+            this.enemy_velocity -= 1;
+          },
+          callbackScope: this,
+          loop: true
+        });
+
+        /* Crea un cuadro de texto en el centro de la pantalla para mostrar la puntuación */
+        this.score_board = this.add.text(window.innerWidth / 2, window.innerHeight / 2 - 125, '0', {
+          fontSize: '32px',
+          color: '#000000'
+        });
+
+        /* Se guarda la puntuación empezando en 0 y cada segundo aumentará en uno.
+          El bucle se guarda como variable para poder pararlo cuando el juego acabe.
+        */
+        this.score = 0;
+        this.score_event = this.time.addEvent({
+          delay: 1000,
+          callback: () => {
+            this.score += 1;
+            this.score_board.setText(this.score);
+          },
+          loop: true
+        });
+
+        /* Crea un objeto de cursores para detectar las pulsaciones */
+        this.cursors = this.input.keyboard.createCursorKeys();
+      }
+
+      spawn_enemy(){
+        /* Crea un enemigo 
+          El enemigo aparece en la parte derecha de la pantalla a la altura del suelo. Tiene un tamaño de 10x10 pixeles y se le aplica la animación de correr.
+        */
+        let enemy = this.physics.add.sprite(window.innerWidth, this.ground.y)
+          .setOrigin(0, 1)
+          .setDisplaySize(10, 10)
+          .play('enemy_run', true);
+        
+        /* Ajusta el tamaño del cuerpo del enemigo para que coincida con el tamaño del sprite */
+        enemy.body.setSize(enemy.width, enemy.height);
+        
+        /* Aplica una velocidad negativa para que el enemigo se mueva hacia la izquierda */
+        enemy.setVelocityX(this.enemy_velocity);
+
+        /* Activa la detección de colisiones con los limites del canva para comprobar que el enemigo salga del canva y eliminarlo */
+        enemy.checkWorldBounds = true;
+        enemy.outOfBoundsKill = true;
+
+        /* Aplica colisiones entre el enemigo y el suelo, para que no caiga */
+        this.physics.add.collider(enemy, this.ground);
+
+        /* Añade el enemigo a la lista de enemigos */
+        this.enemies.push(enemy);
+
+        /* Detecta colisiones entre el jugador y el enemigo para acabar el juego */
+        this.physics.add.overlap(this.player, enemy, this.finish_game, null, this);
+      }
+
+      finish_game(){
+        /* Para las fisicas, de forma que el jugador no se pueda mover ni los enemigos caminar */
+        this.physics.pause();
+
+        /* Para la animación del jugador */
+        this.player.anims.stop();
+
+        /* Para la animación de los enemigos */
+        for (let enemy of this.enemies) {
+          enemy.anims.stop();
+        }
+
+        /* Se elimina el evento de puntuación */
+        this.score_event.remove();
+
+        /* Se marca el juego como terminado */
+        this.game_over = true;
+      }
+
+      /* Actualiza el estado del juego */
+      update() {
+        /* Detecta que la tecla R se ha pulsado para reiniciar */
+        if (this.restartKey.isDown) {
+          this.scene.restart();
+        }
+
+        /* Si el juego ha acabado, no se ejecuta más código */
+        if (this.game_over) return
+
+        /* Mueve el punto de inicio de la imagen en el eje X
+          Esto hace que el patron empiece a repetirse cada vez dos pixeles más a la izquierda, creando el efecto de que la imagen se esta moviendo.
+        */
+        this.background.tilePositionX += 2;
+
+        /* Comprueba que el usuario este en el suelo */
+          if (this.player.body.blocked.down) {
+            /* Si el usuario esta en el suelo y se pulsa espacio, salta */
+            if (this.cursors.space.isDown){
+              this.player.setVelocityY(-300);
+              this.player.play('player_jump', true);
+
+            /* Si el usuario esta en el suelo por defecto aplica la animación de correr */
+            } else {
+              this.player.play('player_run', true);
+            }
+          }
+      }
+    }
+
+    const config = {
+      type: Phaser.AUTO,
+      width: window.innerWidth,
+      height: window.innerHeight,
+      physics: {
+        default: 'arcade',
+        arcade: {
+          gravity: { y: 500 },
+          debug: false
+        }
+      },
+      scene: Main
+    };
+
+    const game = new Phaser.Game(config);
+  </script>
+</body>
+
+</html>
