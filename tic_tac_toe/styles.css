@@ -1,0 +1,109 @@
+#game-board{
+  width: min(100vw, 900px);
+  height: min(100vw, 900px);
+  background-color: black;
+  margin: 0 auto;
+}
+
+.row{
+  display: flex;
+  width: 100%;
+  height: 33.333%;
+}
+
+.square {
+  width: 33.333%;
+  height: 100%;
+  border: 1px solid white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circle{
+  width: 50%;
+  height: 50%;
+  border: 15px solid green;
+  border-radius: 50%;
+}
+
+.cross {
+  width: 70%;
+  height: 70%;
+  position: relative;
+}
+
+.cross::before,
+.cross::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  height: 15px;
+  background-color: red;
+  transform-origin: center;
+}
+
+.cross::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.cross::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+#game-mode{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+  margin: 0 15px 0 15px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: green;
+  transition: 0.4s;
+  border-radius: 34px;
+}
+
+/* La bolita del switch */
+.slider::before {
+  content: "";
+  position: absolute;
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* Cuando el checkbox está activado */
+input:checked+.slider {
+  background-color: red;
+}
+
+input:checked+.slider::before {
+  transform: translateX(26px);
+}
