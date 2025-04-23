@@ -1,8 +1,9 @@
 /* Algoritmo para encontrar la mejor jugada */
 function minimax(board, depth, isMaximizingPlayer) {
   const winner = checkWinner(board);
-  if (winner === 'X') return -10;
-  if (winner === 'O') return 10;
+  if (winner === userSymbol) return -10 + depth;
+  if (winner === computerSymbol) return 10 - depth;
+
   if (isBoardFull(board)) return 0;
 
   if (isMaximizingPlayer){
@@ -11,7 +12,7 @@ function minimax(board, depth, isMaximizingPlayer) {
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (board[row][col] === '') {
-          board[row][col] = 'O';
+          board[row][col] = computerSymbol;
           best = Math.max(best, minimax(board, depth + 1, false));
           board[row][col] = '';
         }
@@ -25,7 +26,7 @@ function minimax(board, depth, isMaximizingPlayer) {
     for (let row = 0; row < 3; row++) {
       for (let col = 0; col < 3; col++) {
         if (board[row][col] === '') {
-          board[row][col] = 'X';
+          board[row][col] = userSymbol;
           best = Math.min(best, minimax(board, depth + 1, true));
           board[row][col] = '';
         }
@@ -39,7 +40,7 @@ function minimax(board, depth, isMaximizingPlayer) {
 /* Hace una jugada por parte de la máquina */
 function makeComputerPlay(board){
   let bestVal = -Infinity;
-  let move = { row: -1, col: -1 };
+  let bestMove  = { row: -1, col: -1 };
   const preferredMoves = [
     { row: 1, col: 1 },
     { row: 0, col: 0 }, { row: 0, col: 2 },
@@ -51,8 +52,8 @@ function makeComputerPlay(board){
   for (let move of preferredMoves) {
     const { row, col } = move;
     if (board[row][col] === '') {
-      board[row][col] = 'O';
-      const moveVal = minimax(board, 0, false);
+      board[row][col] = computerSymbol;
+      const moveVal = minimax(board, 0, computerSymbol === 'O');
       board[row][col] = '';
 
       if (moveVal > bestVal) {
@@ -155,7 +156,7 @@ function randomizeFirstUser(){
   } else {
     userSymbol = 'O';
     computerSymbol = 'X';
-    makeComputerPlay(logicBoard);
+    if (!gameMode.checked) makeComputerPlay(logicBoard)
   }
 }
 
@@ -184,16 +185,20 @@ function createSquareEvents(){
     physicalBoard.push(square);
 
     container.addEventListener('click', function (event) {
-      /* Comprueba si el juego continua y si el jugador ha jugado */
-      if (playing && handlePlay(square, userSymbol)){
+      /* Comprueba si el juego continua */
+      if (playing){
+        let userHasPlayed = handlePlay(square, userSymbol);
 
-        /* Si el juego es contra la máquina, hace su jugada el CPU */
-        if (!gameMode.checked){
-          makeComputerPlay(logicBoard);
+        /* Comprueba si el jugador ha hecho su movimiento y el juego continua */
+        if (userHasPlayed && playing){
+          /* Si el juego es contra la máquina, hace su jugada la CPU */
+          if (!gameMode.checked){
+            makeComputerPlay(logicBoard);
 
-        /* Si el juego es de dos jugadores, se cambia el simbolo del usuario */
-        } else {
-          userSymbol = userSymbol === 'O' ? 'X' : 'O';
+          /* Si el juego es de dos jugadores, se cambia el simbolo del usuario */
+          } else {
+            userSymbol = userSymbol === 'O' ? 'X' : 'O';
+          }
         }
       }
     });
