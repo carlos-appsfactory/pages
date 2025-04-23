@@ -1,0 +1,65 @@
+h1{
+  text-align: center;
+  font-size: 3rem;
+}
+
+#game-board{
+  width: min(100vw, 700px);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: monospace;
+}
+
+#img-container{
+  width: 40%;
+}
+
+#hangman-image{
+  max-width: 100%;
+}
+
+#play-container{
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+#word-container,
+#incorrect-letters{
+  display: flex;
+  gap: 1rem;
+}
+
+#word-container{
+  font-size: 3rem;
+}
+
+#word-container > *{
+  border-bottom: 5px solid black;
+  width: 1ch;
+}
+
+#incorrect-letters {
+  flex-wrap: wrap;
+  font-size: 2rem;
+}
+
+#incorrect-letters > *{
+  position: relative;
+  width: 1ch;
+  text-align: center;
+}
+
+#incorrect-letters > *::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 150%;
+  height: 2px;
+  background: red;
+  transform: translateX(-15%) rotate(-45deg);
+  transform-origin: center;
+}
