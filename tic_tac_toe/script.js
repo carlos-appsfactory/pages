@@ -53,7 +53,7 @@ function makeComputerPlay(board){
     const { row, col } = move;
     if (board[row][col] === '') {
       board[row][col] = computerSymbol;
-      const moveVal = minimax(board, 0, computerSymbol === 'O');
+      const moveVal = minimax(board, 0, false);
       board[row][col] = '';
 
       if (moveVal > bestVal) {
