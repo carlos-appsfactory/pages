@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <div class="machine">
+    <div class="scores">
+      <label>Amount</label>
+      <input type='text' id='amount' disabled>
+      <label>Wins</label>
+      <input type='text' id='win' disabled>
+    </div>
+    <div class='display'>
+      <div class='reels'><img id='reel1' src='images/7.png'></div>
+      <div class='reels'><img id='reel2' src='images/7.png'></div>
+      <div class='reels'><img id='reel3' src='images/7.png'></div>
+    </div>
+    <div class='controls'>
+      <label>Bet</label>
+      <select id='bet'>
+        <option value='1'>1c</option>
+        <option value='10'>10c</option>
+        <option value='20'>20c</option>
+        <option value='40'>40c</option>
+        <option value='60'>60c</option>
+        <option value='100'>100c</option>
+        <option value='200'>200c</option>
+        <option value='500'>500c</option>
+      </select>
+      <input type='button' value='SPIN REELS' id='spin'>
+    </div>
+    <div class='paytable'>
+      <div class="paytable_row">
+        <img src="images/9.png">
+        <img src="images/9.png">
+        <img src="images/9.png">
+        <span>1000</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/4.png">
+        <img src="images/4.png">
+        <img src="images/4.png">
+        <span>10</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/8.png">
+        <img src="images/8.png">
+        <img src="images/8.png">
+        <span>500</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/3.png">
+        <img src="images/3.png">
+        <img src="images/3.png">
+        <span>&nbsp5</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/7.png">
+        <img src="images/7.png">
+        <img src="images/7.png">
+        <span>300</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/2.png">
+        <img src="images/2.png">
+        <img src="images/2.png">
+        <span>&nbsp3</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/6.png">
+        <img src="images/6.png">
+        <img src="images/6.png">
+        <span>100</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/1.png">
+        <img src="images/1.png">
+        <img src="images/1.png">
+        <span>&nbsp2</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/5.png">
+        <img src="images/5.png">
+        <img src="images/5.png">
+        <span>20</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/0.png">
+        <img src="images/0.png">
+        <img src="images/0.png">
+        <span>&nbsp1</span>
+      </div>
+      <div class="paytable_row">
+        <img src="images/9.png"><span>WILD</span>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
